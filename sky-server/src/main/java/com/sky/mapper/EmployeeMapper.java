@@ -16,5 +16,4 @@ public interface EmployeeMapper extends BaseMapper<Employee> {
     @Select("select * from employee where username = #{username}")
     Employee getByUsername(String username);
 
-    int insert(Employee employee);
 }
