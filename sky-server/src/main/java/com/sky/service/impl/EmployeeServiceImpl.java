@@ -3,12 +3,14 @@ package com.sky.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.sky.constant.MessageConstant;
 import com.sky.constant.StatusConstant;
+import com.sky.context.BaseContext;
 import com.sky.dto.EmployeeDTO;
 import com.sky.dto.EmployeeLoginDTO;
 import com.sky.entity.Employee;
 import com.sky.exception.AccountLockedException;
 import com.sky.exception.AccountNotFoundException;
 import com.sky.exception.PasswordErrorException;
+import com.sky.exception.UsernameExitException;
 import com.sky.mapper.EmployeeMapper;
 import com.sky.service.EmployeeService;
 import org.springframework.beans.BeanUtils;
@@ -60,6 +62,12 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
 
     @Override
     public void addEmployee(EmployeeDTO employeeDTO) {
+
+        Employee ifExit = employeeMapper.getByUsername(employeeDTO.getUsername());
+        if (ifExit != null) {
+            throw new UsernameExitException(MessageConstant.USERNAME_EXIT);
+        }
+
         Employee employee = new Employee();
 
         BeanUtils.copyProperties(employeeDTO, employee);
@@ -71,10 +79,9 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
         // employee.setCreateTime(now);
         // employee.setUpdateTime(now);
 
-        // TODO 记录当前创建人和更新人的id
-        // employee.setCreateUser(BaseContext.getCurrentId());
-        employee.setCreateUser(10L);
-        employee.setUpdateUser(10L);
+        // 记录当前创建人和更新人的id
+        employee.setCreateUser(BaseContext.getCurrentId());
+        employee.setUpdateUser(BaseContext.getCurrentId());
 
         employee.setId(null);
         employeeMapper.insert(employee);
