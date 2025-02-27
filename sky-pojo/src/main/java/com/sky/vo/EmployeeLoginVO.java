@@ -1,7 +1,7 @@
 package com.sky.vo;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.SchemaProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,19 +13,19 @@ import java.io.Serializable;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@ApiModel(description = "员工登录返回的数据格式")
+@Schema(description = "员工登录返回的数据格式")
 public class EmployeeLoginVO implements Serializable {
 
-    @ApiModelProperty("主键值")
+    @SchemaProperty(name = "主键值")
     private Long id;
 
-    @ApiModelProperty("用户名")
+    @SchemaProperty(name = "用户名")
     private String userName;
 
-    @ApiModelProperty("姓名")
+    @SchemaProperty(name = "姓名")
     private String name;
 
-    @ApiModelProperty("jwt令牌")
+    @SchemaProperty(name = "jwt令牌")
     private String token;
 
 }
