@@ -73,4 +73,11 @@ public class CategoryController {
         queryWrapper.orderByAsc(Category::getSort);
         return Result.success(categoryService.list(queryWrapper));
     }
+
+    @PostMapping("/aop")
+    public Result<String> testAop() {
+        log.info("测试aop");
+        categoryService.testAop();
+        return Result.success();
+    }
 }

@@ -16,4 +16,6 @@ public interface CategoryService extends IService<Category>  {
     void addCategory(CategoryDTO categoryDTO);
 
     void deleteCategory(Long id);
+
+    void testAop();
 }
