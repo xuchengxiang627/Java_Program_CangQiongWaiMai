@@ -14,4 +14,6 @@ public interface CategoryService extends IService<Category>  {
     void startOrStop(Integer status, Long id);
 
     void addCategory(CategoryDTO categoryDTO);
+
+    void deleteCategory(Long id);
 }

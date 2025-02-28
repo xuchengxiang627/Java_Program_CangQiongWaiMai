@@ -59,7 +59,7 @@ public class CategoryController {
     @Operation(summary = "删除分类")
     public Result<String> deleteCategory(Long id) {
         log.info("删除分类：{}", id);
-        categoryService.removeById(id);
+        categoryService.deleteCategory(id);
         return Result.success();
     }
 

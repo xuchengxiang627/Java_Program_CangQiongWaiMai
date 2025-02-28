@@ -10,8 +10,13 @@ import com.sky.context.BaseContext;
 import com.sky.dto.CategoryDTO;
 import com.sky.dto.CategoryPageQueryDTO;
 import com.sky.entity.Category;
+import com.sky.entity.Dish;
+import com.sky.entity.Setmeal;
+import com.sky.exception.DeletionNotAllowedException;
 import com.sky.exception.UpdateFailedException;
 import com.sky.mapper.CategoryMapper;
+import com.sky.mapper.DishMapper;
+import com.sky.mapper.SetmealMapper;
 import com.sky.result.PageResult;
 import com.sky.service.CategoryService;
 import org.springframework.beans.BeanUtils;
@@ -25,6 +30,13 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
 
     @Autowired
     private CategoryMapper categoryMapper;
+
+    @Autowired
+    private DishMapper dishMapper;
+
+    @Autowired
+    private SetmealMapper setmealMapper;
+
     @Override
     public void updateCategory(CategoryDTO categoryDTO) {
         Category category = new Category();
@@ -81,6 +93,33 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
         category.setCreateUser(BaseContext.getCurrentId());
         category.setUpdateUser(BaseContext.getCurrentId());
         categoryMapper.insert(category);
+    }
+
+    @Override
+    public void deleteCategory(Long id) {
+        // 判断当前分类是否关联了菜品，如果关联了，抛出业务异常
+        LambdaQueryWrapper<Dish> dishLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        dishLambdaQueryWrapper.eq(Dish::getCategoryId, id);
+        long count = dishMapper.selectCount(dishLambdaQueryWrapper);
+        if (count > 0) {
+            // 当前分类下有菜品，不能删除
+            throw new DeletionNotAllowedException("当前分类下有菜品，不能删除");
+        }
+
+        // 判断当前分类是否关联了套餐，如果关联了，抛出业务异常
+        LambdaQueryWrapper<Setmeal> setmealLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        setmealLambdaQueryWrapper.eq(Setmeal::getCategoryId, id);
+        count = setmealMapper.selectCount(setmealLambdaQueryWrapper);
+        if (count > 0) {
+            // 当前分类下有套餐，不能删除
+            throw new DeletionNotAllowedException("当前分类下有套餐，不能删除");
+        }
+
+        int i = categoryMapper.deleteById(id);
+        if (i == 0) {
+            throw new UpdateFailedException("删除分类失败");
+        }
+
     }
 
 
