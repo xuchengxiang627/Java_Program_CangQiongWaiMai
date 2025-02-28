@@ -1,5 +1,6 @@
 package com.sky.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,7 +15,7 @@ import java.time.LocalDateTime;
 public class Category implements Serializable {
 
     private static final long serialVersionUID = 1L;
-
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long id;
 
     //类型: 1菜品分类 2套餐分类
