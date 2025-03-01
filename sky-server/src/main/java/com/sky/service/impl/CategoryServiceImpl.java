@@ -124,8 +124,10 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
 
     @Override
     public void testAop() {
-        Category category = Category.builder().status(1).sort(10086).name("a222opppp").build();
-        categoryMapper.testAop(category);
+        Category category = Category.builder().status(1).sort(8888).name("4444").build();
+        System.out.println("category = " + category);
+        categoryMapper.insert(category);
+        System.out.println("category = " + category);
     }
 
 
