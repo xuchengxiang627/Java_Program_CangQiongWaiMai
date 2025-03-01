@@ -29,6 +29,14 @@ mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
+
+minio:
+  url: http://192.168.229.101:9000
+  access-key: minioadmin
+  secret-key: minioadmin
+  bucket-name: sky
+
+
 logging:
   level:
     com:

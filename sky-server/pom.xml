@@ -84,6 +84,13 @@
             <artifactId>druid-spring-boot-starter</artifactId>
         </dependency>
 
+        <!--minio-->
+        <dependency>
+            <groupId>io.minio</groupId>
+            <artifactId>minio</artifactId>
+            <version>8.5.3</version>
+        </dependency>
+
         <!--<dependency>-->
         <!--    <groupId>com.github.pagehelper</groupId>-->
         <!--    <artifactId>pagehelper-spring-boot-starter</artifactId>-->
