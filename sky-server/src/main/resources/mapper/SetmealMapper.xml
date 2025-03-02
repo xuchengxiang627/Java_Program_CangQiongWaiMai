@@ -2,4 +2,29 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.sky.mapper.SetmealMapper">
+
+    <select id="page" resultType="com.sky.vo.SetmealVO">
+        select s.id,
+               s.category_id,
+               s.name,
+               s.price,
+               s.status,
+               s.description,
+               s.image,
+               s.update_time,
+               c.name as categoryName
+        from setmeal s
+        join category c on s.category_id = c.id
+        <where>
+            <if test="setmealPageQueryDTO.name != null and setmealPageQueryDTO.name != ''">
+                and s.name like concat('%',#{setmealPageQueryDTO.name},'%')
+            </if>
+            <if test="setmealPageQueryDTO.categoryId != null">
+                and s.category_id = #{setmealPageQueryDTO.categoryId}
+            </if>
+            <if test="setmealPageQueryDTO.status != null">
+                and s.status = #{setmealPageQueryDTO.status}
+            </if>
+        </where>
+    </select>
 </mapper>

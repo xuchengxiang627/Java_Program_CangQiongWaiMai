@@ -9,10 +9,12 @@ import com.sky.constant.MessageConstant;
 import com.sky.constant.StatusConstant;
 import com.sky.dto.DishDTO;
 import com.sky.dto.DishPageQueryDTO;
+import com.sky.entity.Category;
 import com.sky.entity.Dish;
 import com.sky.entity.DishFlavor;
 import com.sky.entity.SetmealDish;
 import com.sky.exception.DeletionNotAllowedException;
+import com.sky.mapper.CategoryMapper;
 import com.sky.mapper.DishFlavorMapper;
 import com.sky.mapper.DishMapper;
 import com.sky.mapper.SetmealDishMapper;
@@ -39,6 +41,9 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
 
     @Autowired
     private SetmealDishMapper setmealDishMapper;
+
+    @Autowired
+    private CategoryMapper categoryMapper;
 
 
     @Override
@@ -117,6 +122,11 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
         }
         DishVO dishVO = new DishVO();
         BeanUtils.copyProperties(dish, dishVO);
+
+        LambdaQueryWrapper<Category> categoryWrapper = new LambdaQueryWrapper<Category>()
+                .eq(Category::getId, dish.getCategoryId());
+        Category category = categoryMapper.selectOne(categoryWrapper);
+        dishVO.setCategoryName(category.getName());
 
         LambdaQueryWrapper<DishFlavor> wrapper = new LambdaQueryWrapper<DishFlavor>()
                 .eq(DishFlavor::getDishId, id);
