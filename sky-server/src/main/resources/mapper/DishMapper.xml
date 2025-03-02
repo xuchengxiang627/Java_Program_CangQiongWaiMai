@@ -2,4 +2,30 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.sky.mapper.DishMapper">
+    <select id="pageQuery" resultType="com.sky.vo.DishVO">
+        select d.id,
+               d.name,
+               d.category_id,
+               d.price,
+               d.image,
+               d.description,
+               d.status,
+               d.update_time,
+               c.name category_name
+        from dish d
+        join category c on d.category_id = c.id
+        <where>
+            <if test="dishPageQueryDTO.name != null and dishPageQueryDTO.name != ''">
+                and d.name like concat('%',#{dishPageQueryDTO.name},'%')
+            </if>
+            <if test="dishPageQueryDTO.categoryId != null">
+                and d.category_id = #{dishPageQueryDTO.categoryId}
+            </if>
+            <if test="dishPageQueryDTO.status != null">
+                and d.status = #{dishPageQueryDTO.status}
+            </if>
+        </where>
+        order by d.create_time desc
+
+    </select>
 </mapper>

@@ -41,11 +41,13 @@ public class Employee implements Serializable {
     private LocalDateTime createTime;
 
     // @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @TableField(value = "update_time", fill = FieldFill.UPDATE)
+    @TableField(value = "update_time", fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updateTime;
 
+    @TableField(value = "create_user", fill = FieldFill.INSERT)
     private Long createUser;
 
+    @TableField(value = "update_user", fill = FieldFill.INSERT_UPDATE)
     private Long updateUser;
 
 }
