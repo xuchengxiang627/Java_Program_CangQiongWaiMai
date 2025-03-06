@@ -1,6 +1,7 @@
 package com.sky.controller.admin;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.sky.constant.RedisConstant;
 import com.sky.dto.DishDTO;
 import com.sky.dto.DishPageQueryDTO;
 import com.sky.entity.Dish;
@@ -12,9 +13,11 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/admin/dish")
@@ -25,11 +28,17 @@ public class DishController {
     @Autowired
     private DishService dishService;
 
+    @Autowired
+    private RedisTemplate redisTemplate;
+
+
     @PostMapping
     @Operation(summary = "新增菜品")
     public Result<String> addDish(@RequestBody DishDTO dishDTO) {
         log.info("新增菜品");
         dishService.addDish(dishDTO);
+
+        redisTemplate.delete(RedisConstant.DISH_CACHE_PRE + dishDTO.getCategoryId());
         return Result.success();
     }
 
@@ -46,6 +55,10 @@ public class DishController {
     public Result<String> deleteDish(@RequestParam("ids") List<Long> ids) {
         log.info("批量删除菜品");
         dishService.deleteDish(ids);
+
+        Set keys = redisTemplate.keys(RedisConstant.DISH_CACHE_PRE + "*");
+        redisTemplate.delete(keys);
+
         return Result.success();
     }
 
@@ -54,6 +67,10 @@ public class DishController {
     public Result<String> startOrStop(@PathVariable Integer status, Long id) {
         log.info("菜品起售停售");
         dishService.startOrStop(status, id);
+
+        Set keys = redisTemplate.keys(RedisConstant.DISH_CACHE_PRE + "*");
+        redisTemplate.delete(keys);
+
         return Result.success();
     }
 
@@ -70,6 +87,11 @@ public class DishController {
     public Result<String> updateDish(@RequestBody DishDTO dishDTO) {
         log.info("修改菜品");
         dishService.updateDish(dishDTO);
+
+        String pattern = RedisConstant.DISH_CACHE_PRE + "*";
+        Set keys = redisTemplate.keys(pattern);
+        redisTemplate.delete(keys);
+
         return Result.success();
     }
 
