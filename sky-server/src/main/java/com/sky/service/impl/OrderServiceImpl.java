@@ -1,6 +1,9 @@
 package com.sky.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.sky.constant.MessageConstant;
 import com.sky.context.BaseContext;
@@ -8,12 +11,16 @@ import com.sky.dto.OrdersPaymentDTO;
 import com.sky.dto.OrdersSubmitDTO;
 import com.sky.entity.*;
 import com.sky.exception.AddressBookBusinessException;
+import com.sky.exception.OrderBusinessException;
 import com.sky.exception.ShoppingCartBusinessException;
 import com.sky.mapper.*;
+import com.sky.result.PageResult;
 import com.sky.service.OrderService;
 import com.sky.utils.WeChatPayUtil;
 import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderSubmitVO;
+import com.sky.vo.OrderVO;
+import com.sky.webSocket.WebSocketServer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +29,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -45,6 +54,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders> implement
 
     @Autowired
     private WeChatPayUtil weChatPayUtil;
+
+    @Autowired
+    private WebSocketServer webSocketServer;
 
 
     @Override
@@ -170,6 +182,83 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders> implement
                 .build();
 
         orderMapper.updateById(orders);
+
+        // 通过websocket向客户端浏览器推送来单提醒
+        Map<String, Object> map = new HashMap<>();
+        map.put("type", 1); // 1表示来单提醒，2表示客户催单
+        map.put("orderId", orders.getId());
+        map.put("content", "订单号：" + outTradeNo);
+
+        webSocketServer.sendToAllClient(JSON.toJSONString(map));
+    }
+
+    @Override
+    public OrderVO orderDetail(Long id) {
+        Orders orders = orderMapper.selectById(id);
+
+        OrderVO orderVO = new OrderVO();
+        BeanUtils.copyProperties(orders, orderVO);
+
+        LambdaQueryWrapper<OrderDetail> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(OrderDetail::getOrderId, id);
+        List<OrderDetail> orderDetailList = orderDetailMapper.selectList(queryWrapper);
+
+        orderVO.setOrderDetailList(orderDetailList);
+        return orderVO;
+    }
+
+    @Override
+    public void cancel(Long id) {
+        Orders orders = Orders.builder()
+                .id(id)
+                .status(Orders.CANCELLED)
+                .cancelReason("用户取消")
+                .cancelTime(LocalDateTime.now())
+                .build();
+        // todo: 订单取消，若已付款，则退款
+
+        orderMapper.updateById(orders);
+    }
+
+    @Override
+    public PageResult historyOrders(Integer pageNum, Integer pageSize, Integer status) {
+        IPage<OrderVO> page = new Page<>(pageNum, pageSize);
+        IPage<OrderVO> pageResult = orderMapper.historyOrders(page, BaseContext.getCurrentId(), status);
+        PageResult result = new PageResult();
+        result.setTotal(pageResult.getTotal());
+        result.setRecords(pageResult.getRecords());
+        return result;
+    }
+
+    @Override
+    public void reminder(Long id) {
+        Orders orders = orderMapper.selectById(id);
+        if (orders == null) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+        Map<String, Object> map = new HashMap<>();
+        map.put("type", 2);
+        map.put("orderId", orders.getId());
+        map.put("content", "订单号：" + orders.getNumber());
+        webSocketServer.sendToAllClient(JSON.toJSONString(map));
+    }
+
+    @Override
+    public void repetition(Long id) {
+        // 获取原订单详情
+        LambdaQueryWrapper<OrderDetail> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(OrderDetail::getOrderId, id);
+        List<OrderDetail> orderDetailList = orderDetailMapper.selectList(queryWrapper);
+        List<ShoppingCart> shoppingCartList = new ArrayList<>();
+        // 将原订单菜品添加到购物车
+        for (OrderDetail orderDetail : orderDetailList) {
+            ShoppingCart shoppingCart = new ShoppingCart();
+            shoppingCart.setUserId(BaseContext.getCurrentId());
+            shoppingCart.setCreateTime(LocalDateTime.now());
+            BeanUtils.copyProperties(orderDetail, shoppingCart);
+            shoppingCartList.add(shoppingCart);
+        }
+        shoppingCartMapper.insertBatch(shoppingCartList);
     }
 
 }

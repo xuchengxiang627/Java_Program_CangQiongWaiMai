@@ -3,4 +3,57 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.sky.mapper.OrderMapper">
 
+    <resultMap id="historyOrdersResultMap" type="com.sky.vo.OrderVO" autoMapping="true">
+        <id property="id" column="id"/>
+        <collection property="orderDetailList" ofType="com.sky.entity.OrderDetail" select="selectOrderDetailsById" column="id"/>
+    </resultMap>
+    <select id="selectOrderDetailsById" resultType="com.sky.entity.OrderDetail">
+        select id,
+               name,
+               image,
+               order_id,
+               dish_id,
+               setmeal_id,
+               dish_flavor,
+               number,
+               amount
+        from order_detail
+        where order_id = #{id}
+    </select>
+
+    <select id="historyOrders" resultMap="historyOrdersResultMap">
+        select o.id,
+               o.number,
+               o.status,
+               o.user_id,
+               o.address_book_id,
+               o.order_time,
+               o.checkout_time,
+               o.pay_method,
+               o.pay_status,
+               o.amount,
+               o.remark,
+               o.phone,
+               o.address,
+               o.user_name,
+               o.consignee,
+               o.cancel_reason,
+               o.rejection_reason,
+               o.cancel_time,
+               o.estimated_delivery_time,
+               o.delivery_status,
+               o.delivery_time,
+               o.pack_amount,
+               o.tableware_number,
+               o.tableware_status
+        from orders o
+        <where>
+            <if test="currentId != null">
+                o.user_id = #{currentId}
+            </if>
+            <if test="status != null">
+                and o.status = #{status}
+            </if>
+        </where>
+    </select>
 </mapper>
