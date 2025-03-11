@@ -56,4 +56,30 @@
             </if>
         </where>
     </select>
+    <select id="selectOrderReport" resultType="com.sky.temPojo.OrderReport">
+        SELECT
+            DATE(order_time) AS date,
+            SUM(CASE WHEN status = 5 THEN 1 ELSE 0 END) AS validOrderCount,
+            COUNT(id) AS totalOrderCount
+        FROM orders
+        WHERE
+        DATE(order_time) IN
+        <foreach item="date" collection="dateList" open="(" separator="," close=")">
+            #{date}
+        </foreach>
+        GROUP BY
+        DATE(order_time)
+    </select>
+    <select id="getSalesTop10" resultType="com.sky.dto.GoodsSalesDTO">
+        select od.name        as name,
+               sum(od.number) as number
+        from orders o
+                 left join order_detail od on o.id = od.order_id
+        where status = 5
+          and order_time >= #{begin}
+          and order_time &lt; #{end}
+        group by od.name
+        order by number desc
+        limit 0, 10
+    </select>
 </mapper>
