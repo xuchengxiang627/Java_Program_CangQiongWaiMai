@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.sky.dto.GoodsSalesDTO;
 import com.sky.entity.Orders;
+import com.sky.temPojo.ExportData;
 import com.sky.temPojo.OrderReport;
 import com.sky.vo.OrderOverViewVO;
 import com.sky.vo.OrderVO;
@@ -25,4 +26,6 @@ public interface OrderMapper extends BaseMapper<Orders> {
     List<GoodsSalesDTO> getSalesTop10(LocalDate begin, LocalDate end);
 
     OrderOverViewVO selectOrderOverView();
+
+    List<ExportData> selectExportData(LocalDate begin, LocalDate end);
 }

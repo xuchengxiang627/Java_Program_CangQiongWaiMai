@@ -93,4 +93,16 @@
         from orders
         where DATE(order_time) = CURDATE()
     </select>
+    <select id="selectExportData" resultType="com.sky.temPojo.ExportData">
+        select
+            DATE(order_time) as date,
+            sum(if(status = 5, amount, 0)) as turnover,
+            sum(if(status = 5, 1, 0)) as validOrderCount,
+            if(count(id) = 0, 0, sum(if(status = 5, 1, 0)) / count(id)) as orderCompletionRate,
+            if(sum(if(status = 5, 1, 0)) = 0, 0, sum(if(status = 5, amount, 0)) / sum(if(status = 5, 1, 0))) as unitPrice
+        from orders
+        where DATE(order_time) BETWEEN #{begin} AND #{end}
+        group by DATE(order_time)
+        order by DATE(order_time)
+    </select>
 </mapper>

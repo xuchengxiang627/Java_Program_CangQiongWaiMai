@@ -8,6 +8,7 @@ import com.sky.vo.TurnoverReportVO;
 import com.sky.vo.UserReportVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -60,5 +61,12 @@ public class ReportController {
             @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end) {
         SalesTop10ReportVO salesTop10ReportVO = reportService.top10(begin, end);
         return Result.success(salesTop10ReportVO);
+    }
+
+    @GetMapping("/export")
+    @Operation(summary = "导出数据")
+    public Result<String> export(HttpServletResponse response) {
+        reportService.export(response);
+        return Result.success();
     }
 }
