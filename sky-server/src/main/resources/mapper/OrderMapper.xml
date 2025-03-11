@@ -55,6 +55,7 @@
                 and o.status = #{status}
             </if>
         </where>
+        order by o.order_time desc
     </select>
     <select id="selectOrderReport" resultType="com.sky.temPojo.OrderReport">
         SELECT
