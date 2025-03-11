@@ -82,4 +82,14 @@
         order by number desc
         limit 0, 10
     </select>
+    <select id="selectOrderOverView" resultType="com.sky.vo.OrderOverViewVO">
+        select
+            sum(case when status = 2 then 1 else 0 end) as waitingOrders,
+            sum(case when status = 3 then 1 else 0 end) as deliveredOrders,
+            sum(case when status = 5 then 1 else 0 end) as completedOrders,
+            sum(case when status = 6 then 1 else 0 end) as cancelledOrders,
+            count(id) as allOrders
+        from orders
+        where DATE(order_time) = CURDATE()
+    </select>
 </mapper>
